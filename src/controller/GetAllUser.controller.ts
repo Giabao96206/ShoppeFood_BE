@@ -18,6 +18,6 @@ export const getAllUser = async (
     res.status(200).json(users);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ status: "500", message: "Internal server error" });
   }
 };

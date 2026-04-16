@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, model, models, Model } from "mongoose";
 interface Code {
   email: string;
   code: string;
@@ -12,7 +12,7 @@ const CodeSchema = new Schema<Code>({
 });
 
 const VerificationCode =
-  mongoose.models.VerificationCode ||
+  (mongoose.models.VerificationCode as Model<Code>) ||
   mongoose.model("VerificationCode", CodeSchema);
 
 export default VerificationCode;

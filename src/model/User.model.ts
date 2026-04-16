@@ -1,11 +1,11 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, model, models, Model } from "mongoose"; // <-- Thêm Model vào import
 
 interface IUser {
   name: string;
   email: string;
   password: string;
   isActive: boolean;
-  avatar: string;
+  avatar?: string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -23,6 +23,7 @@ const userSchema = new Schema<IUser>(
   { timestamps: true },
 );
 
-const User = models.User || model<IUser>("User", userSchema);
+// 👇 Ép kiểu rõ ràng tại đây 👇
+const User = (models.User as Model<IUser>) || model<IUser>("User", userSchema);
 
 export default User;

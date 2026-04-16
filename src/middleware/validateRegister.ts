@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-
+import User from "../model/User.model";
 interface Iuser {
   name: string;
   email: string;
   password: string;
 }
-export const validateRegister = (
+export const validateRegister = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -21,6 +21,11 @@ export const validateRegister = (
     return res.status(400).json({
       message: "Vui lòng nhập đầy đủ name, email, password",
     });
+  }
+
+  const emailExists = await User.findOne({ email } as any);
+  if (emailExists) {
+    return res.status(400).json({ message: "Email already exists" });
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

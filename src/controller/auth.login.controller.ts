@@ -11,11 +11,11 @@ interface IUser extends Document {
   isActive?: boolean;
   avatar?: string;
 }
-export const Login = async (req: Request, res: Response): Promise<any> => {
+export const Login = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { email, password } = req.body;
 
-    const user: IUser | null = await User.findOne({ email } as any);
+    const user: IUser | null = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "Email không tồn tại!" });
@@ -29,6 +29,7 @@ export const Login = async (req: Request, res: Response): Promise<any> => {
     if (!user.isActive) {
       return res.status(403).json({
         message: "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email!",
+        status: "403",
       });
     }
 
@@ -55,6 +56,6 @@ export const Login = async (req: Request, res: Response): Promise<any> => {
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ status: "500", message: "Server error" });
   }
 };
