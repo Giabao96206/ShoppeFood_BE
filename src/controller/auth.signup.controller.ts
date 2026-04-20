@@ -16,6 +16,7 @@ export const register = async (
 ): Promise<Response> => {
   try {
     const { name, email, password }: IUser = req.body;
+    console.log(name, email, password);
 
     const avatarUrl = req.file
       ? req.file.path
@@ -58,7 +59,7 @@ export const register = async (
     return res.status(500).json({
       message: "Đã xảy ra lỗi từ phía Server!",
       error: err,
-      status :"500",
+      status: "500",
     });
   }
 };
@@ -83,9 +84,55 @@ export const activateAccount = async (
       { $set: { isActive: true } },
       { new: true },
     );
+
     await VerificationCode.deleteOne({ _id: validCode._id });
     return res.status(200).json({
       message: "Kích hoạt tài khoản thành công!",
+      status: "200",
+      data: {
+        _id: validCode._id,
+        email: validCode.email,
+        code: validCode.code,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi Server!", error });
+  }
+};
+
+// ... (Các hàm register, activateAccount, login giữ nguyên)
+
+export const resendCode = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { email }: { email: string } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        status: "404",
+        message: "Không tìm thấy tài khoản với email này!",
+      });
+    }
+
+    if (user?.isActive) {
+      return res.status(400).json({
+        status: "400",
+        message: "Tài khoản của bạn đã được kích hoạt từ trước!",
+      });
+    }
+
+    await VerificationCode.deleteMany({ email });
+
+    const Newcode: string = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
+
+    const savedCode = new VerificationCode({ email, code: Newcode });
+    await savedCode.save();
+
+    await sendVerificationEmail(email, Newcode);
+    return res.status(200).json({
+      status: "200",
+      message: "Mã xác nhận mới đã được gửi. Vui lòng kiểm tra email của bạn!",
     });
   } catch (error) {
     return res.status(500).json({ message: "Lỗi Server!", error });
