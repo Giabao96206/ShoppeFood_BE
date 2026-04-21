@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import User from "../model/User.model";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { Document } from "mongoose";
 import { access } from "node:fs";
 
@@ -81,16 +81,19 @@ export const CheckAccount = async (
   res: Response,
 ): Promise<Response> => {
   const authHeader = req.headers.authorization;
+
   if (!authHeader) {
     return res.status(401).json({ message: "Chưa có token" });
   }
-  console.log(authHeader);
 
   if (!authHeader) {
     return res.status(401).json({ message: "Chưa đăng nhập" });
   }
 
   const token: string = authHeader.split(" ")[1] || "";
+  if (token == null) {
+    return res.status(401).json({ message: "Chưa có token" });
+  }
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
     console.log(decoded);
@@ -103,7 +106,11 @@ export const CheckAccount = async (
       },
     });
   } catch (err) {
-    console.log(err);
+    if (err instanceof TokenExpiredError) {
+      return res
+        .status(401)
+        .json({ message: "Token hết hạn, vui lòng đăng nhập lại" });
+    }
     return res.status(500).json({ status: "500", message: "Server error" });
   }
 };
