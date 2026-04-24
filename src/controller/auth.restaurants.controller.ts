@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import restaurants from "../model/restaurants.model";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
+import menus from "../model/Menu.model";
+import menuitems from "../model/MenuItems.model";
 
 interface IRestaurants extends Document {
   name: string;
@@ -10,6 +12,20 @@ interface IRestaurants extends Document {
   rating: number;
   image: string;
   isActive: boolean;
+}
+
+interface IMenu extends Document {
+  restaurants: string;
+  title: string;
+}
+
+interface IMenuItems extends Document {
+  menu: Types.ObjectId;
+  title: string;
+  description: string;
+  basePrice: number;
+  image: string;
+  options: string[];
 }
 export const TopRating = async (
   req: Request,
@@ -28,5 +44,70 @@ export const TopRating = async (
   } catch (err) {
     console.log(err);
     return res.status(500).json({ status: "500", message: "Server error" });
+  }
+};
+
+export const MenuRestaurant = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
+  try {
+    const { id } = req.params;
+
+    const restaurant = await restaurants.findById(id);
+
+    if (!restaurant) {
+      return res.status(404).json({
+        status: "404",
+        message: "Restaurant not found",
+      });
+    }
+
+    const menusList = await menus.find({
+      restaurant: restaurant._id,
+    });
+
+    if (!menusList || menusList.length === 0) {
+      return res.status(404).json({
+        status: "404",
+        message: "Menu not found",
+      });
+    }
+
+    const menusWithItems = await Promise.all(
+      menusList.map(async (menu) => {
+        const menuItems = await menuitems.find({
+          menu: menu._id,
+        });
+
+        return {
+          _id: menu._id,
+          title: menu.title,
+          restaurant: menu.restaurants,
+          menuItems,
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      message: "Success",
+      status: "200",
+      data: {
+        _id: restaurant._id,
+        name: restaurant.name,
+        phone: restaurant.phone,
+        email: restaurant.email,
+        address: restaurant.address,
+        rating: restaurant.rating,
+        image: restaurant.image,
+        menus: menusWithItems,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      status: "500",
+      message: "Server error",
+    });
   }
 };

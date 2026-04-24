@@ -7,6 +7,7 @@ import ReSend from "./ReSendCode.routers";
 import Check from "./acount.login.routers";
 import uploadrouter from "./upload.image.routers";
 import TopRate from "./RatingRes.routers";
+import Menu from "./GetMenu.routers";
 
 import { uploadCloud } from "../config/cloudinary";
 
@@ -19,6 +20,7 @@ const route = (app: Express) => {
   app.use("/account", Check);
   app.use("/api/upload", uploadrouter);
   app.use("/topRating", TopRate);
+  app.use("/menu", Menu);
 };
 
 export default route;
