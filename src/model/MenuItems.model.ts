@@ -1,27 +1,76 @@
 import mongoose, { Schema, model, models, Model, Types } from "mongoose";
-interface menuitems {
+
+interface IOptions {
+  title: string;
+  description: string;
+  additionalPrice: number;
+}
+
+interface IMenuItems {
   menu: Types.ObjectId;
   title: string;
   description: string;
   basePrice: number;
   image: string;
-  options: string[];
+  options: IOptions[];
 }
 
-const restaurantsSchema = new Schema<menuitems>(
+const optionSchema = new Schema<IOptions>(
   {
-    menu: { type: Types.ObjectId, required: true },
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    basePrice: { type: Number, required: true },
-    image: { type: String, required: true },
-    options: { type: [String], default: [] },
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    additionalPrice: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
-  { timestamps: true },
+  { _id: false },
 );
 
-const menuitems =
-  (mongoose.models.menuitems as Model<menuitems>) ||
-  mongoose.model("menuitems", restaurantsSchema);
+const menuItemsSchema = new Schema<IMenuItems>(
+  {
+    menu: {
+      type: Schema.Types.ObjectId,
+      ref: "menus",
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    basePrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
+    options: {
+      type: [optionSchema],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-export default menuitems;
+const MenuItems: Model<IMenuItems> =
+  models.menuitems || model<IMenuItems>("menuitems", menuItemsSchema);
+
+export default MenuItems;

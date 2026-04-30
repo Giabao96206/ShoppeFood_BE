@@ -4,6 +4,12 @@ import { Document, Types } from "mongoose";
 import menus from "../model/Menu.model";
 import menuitems from "../model/MenuItems.model";
 
+interface IOptions {
+  title: string;
+  description: string;
+  additionalPrice: number;
+}
+
 interface IRestaurants extends Document {
   name: string;
   phone: string;
@@ -25,12 +31,13 @@ interface IMenuItems extends Document {
   description: string;
   basePrice: number;
   image: string;
-  options: string[];
+  options: IOptions[];
 }
 export const TopRating = async (
   req: Request,
   res: Response,
 ): Promise<Response> => {
+  // await new Promise((resolve) => setTimeout(resolve, ));
   try {
     const topRestaurants = await restaurants.aggregate([
       { $match: { isActive: true } },
@@ -53,6 +60,8 @@ export const MenuRestaurant = async (
 ): Promise<Response> => {
   try {
     const { id } = req.params;
+
+    // await new Promise((resolve) => setTimeout(resolve, 5000));
 
     const restaurant = await restaurants.findById(id);
 
@@ -79,6 +88,8 @@ export const MenuRestaurant = async (
         const menuItems = await menuitems.find({
           menu: menu._id,
         });
+
+        console.log(menuItems);
 
         return {
           _id: menu._id,
