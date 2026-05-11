@@ -5,12 +5,12 @@ export const Upload = async (
   res: Response,
 ): Promise<Response> => {
   try {
-    const files = req.files as Express.Multer.File[] | undefined;
+    const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
       return res.status(400).json({ message: "Không tìm thấy ảnh!" });
     }
 
-    const uploadedFiles = files.map((file) => ({
+    const uploadedFiles = files.map((file: Express.Multer.File) => ({
       filename: file.filename,
       path: file.path,
       size: file.size,

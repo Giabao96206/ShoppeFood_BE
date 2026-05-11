@@ -5,6 +5,7 @@ import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { Document } from "mongoose";
 import { access } from "node:fs";
 
+
 interface IUser extends Document {
   name?: string;
   email: string;
@@ -25,10 +26,11 @@ export const Login = async (req: Request, res: Response): Promise<Response> => {
       return res.status(404).json({ message: "Email không tồn tại!" });
     }
 
+  
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
-        .status(401)
+        .status(401)  
         .json({ status: "401", message: "Sai tài khoản hoặc mật khẩu" });
     }
 
@@ -47,11 +49,7 @@ export const Login = async (req: Request, res: Response): Promise<Response> => {
     const token = jwt.sign(
       {
         userID: user._id,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar,
         role: user.role,
-        phone: user.phone,
       },
       SECRET_KEY,
       { expiresIn: "1h" },
@@ -86,6 +84,7 @@ export const CheckAccount = async (
     return res.status(401).json({ message: "Chưa có token" });
   }
 
+
   if (!authHeader) {
     return res.status(401).json({ message: "Chưa đăng nhập" });
   }
@@ -94,15 +93,21 @@ export const CheckAccount = async (
   if (token == null) {
     return res.status(401).json({ message: "Chưa có token" });
   }
+  
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-    console.log(decoded);
+
+    const user = await User.findById(decoded.userID);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    console.log( decoded);
 
     return res.status(200).json({
       status: "200",
       message: "Token hợp lệ",
       data: {
-        user: decoded,
+        user: user,
       },
     });
   } catch (err) {

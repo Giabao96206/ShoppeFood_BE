@@ -7,7 +7,7 @@ interface Iuser {
 }
 export const validateRegister = async (
   req: Request,
-  res: Response,
+  res: Respone,
   next: NextFunction,
 ) => {
   const { name, email, password }: Iuser = req.body;

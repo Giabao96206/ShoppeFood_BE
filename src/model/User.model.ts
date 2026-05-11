@@ -8,6 +8,7 @@ interface IUser {
   isActive: boolean;
   avatar?: string;
   role?: string;
+  last_seen?: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -17,11 +18,13 @@ const userSchema = new Schema<IUser>(
     phone: { type: String, default: "" },
     password: { type: String, required: true },
     role: { type: String, default: "user" },
+
     avatar: {
       type: String,
       default:
         "https://res.cloudinary.com/doppezovj/image/upload/v1776220896/ava_bounap.png",
     },
+    last_seen: { type: Date, default: "" },
     isActive: { type: Boolean, default: false },
   },
   { timestamps: true },

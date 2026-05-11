@@ -4,9 +4,9 @@ import User from "../model/User.model";
 import VerificationCode from "../model/Code.model";
 import { sendVerificationEmail } from "../utils/mailer";
 interface User {
+  _id: string;
   name: string;
   email: string;
-  password: string;
 }
 
 export const getAllUser = async (
@@ -15,7 +15,11 @@ export const getAllUser = async (
 ): Promise<void> => {
   try {
     const users: User[] = await User.find();
-    res.status(200).json(users);
+    res.status(200).json({
+      status: "200",
+      message: "Success",
+      data: users,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: "500", message: "Internal server error" });

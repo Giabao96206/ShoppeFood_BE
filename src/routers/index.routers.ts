@@ -8,9 +8,10 @@ import Check from "./acount.login.routers";
 import uploadrouter from "./upload.image.routers";
 import TopRate from "./RatingRes.routers";
 import Menu from "./GetMenu.routers";
-
-import { uploadCloud } from "../config/cloudinary";
-
+import createOder from "./order.routers";
+import getOrder from "./getOrder.router";
+import AuthEdit from "./edit.routers";
+import Cancel from "./order.cacel.routers"
 const route = (app: Express) => {
   app.use("/register", signUpRouter);
   app.use("/activateAccount", activateAccount);
@@ -21,6 +22,10 @@ const route = (app: Express) => {
   app.use("/api/upload", uploadrouter);
   app.use("/topRating", TopRate);
   app.use("/menu", Menu);
+  app.use("/api/order", createOder);
+  app.use("/api/getOrder", getOrder);
+  app.use("/editUser", AuthEdit);
+  app.use("/cancelOrder", Cancel);
 };
 
 export default route;
