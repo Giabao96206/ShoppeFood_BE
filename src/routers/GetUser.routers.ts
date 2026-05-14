@@ -1,8 +1,9 @@
 import express from "express";
-import { getAllUser } from "../controller/GetAllUser.controller";
+import { getConversation } from "../controller/GetAllUser.controller";
+import { validateOrder } from "../middleware/order.middleware";
 
 const router = express.Router();
 
-router.get("/", getAllUser);
+router.post("/", validateOrder,  getConversation);
 
 export default router;

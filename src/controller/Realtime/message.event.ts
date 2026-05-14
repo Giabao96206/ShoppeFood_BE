@@ -15,7 +15,7 @@ export const registerMessageEvent = (
           senderId: userId,
           receiverId: payload.receiverId,
           content: payload.content,
-        });
+      });
 
         io.to(payload.receiverId).emit(
           "receive_new_message",

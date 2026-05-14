@@ -1,27 +1,43 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
-import User from "../model/User.model";
-import VerificationCode from "../model/Code.model";
-import { sendVerificationEmail } from "../utils/mailer";
+import { Conversation } from "../model/Conversation.model";
 interface User {
   _id: string;
   name: string;
   email: string;
 }
 
-export const getAllUser = async (
+export const getConversation = async (
   req: Request,
   res: Response,
-): Promise<void> => {
+): Promise<Response> => {
   try {
-    const users: User[] = await User.find();
-    res.status(200).json({
+    const userId = req.user!.userID;
+
+    const conversations = await Conversation.find({
+      participants: userId,
+    }).populate("participants", "name avatar last_seen");
+
+    const result = conversations.map((conv: any) => {
+      const otherUser = conv.participants.find(
+        (p: any) => p._id.toString() !== userId.toString()
+      );
+
+      return {
+        _id: conv._id,
+        otherUser,
+        lastMessage: conv.last_message,
+      };
+    });
+
+    return res.status(200).json({
       status: "200",
       message: "Success",
-      data: users,
+      data: result,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "500", message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ status: "500", message: "Internal server error" });
   }
 };
