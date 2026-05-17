@@ -6,10 +6,9 @@ import { registerMessageEvent } from "./controller/Realtime/message.event";
 import { registerReadEvent } from "./controller/Realtime/read.event";
 import { registerDisconnectEvent } from "./controller/Realtime/disconnect.event";
 
+export const onLineUsers = new Map();
 
-export const initializeSocket = (
-  httpServer: HttpServer
-) => {
+export const initializeSocket = (httpServer: HttpServer) => {
   const io = new SocketIOServer(httpServer, {
     cors: {
       origin: "*",
@@ -17,16 +16,25 @@ export const initializeSocket = (
     },
   });
 
-  // middleware auth
   io.use(authSocketMiddleware);
 
   io.on("connection", (socket: Socket) => {
     const userId = socket.data.userId;
     socket.join(userId);
-  
+
+    onLineUsers.set(userId, socket.id);
+
+    socket.broadcast.emit("user_online", userId); 
+
+    socket.on("request_online_users", () => {
+    const currentOnlineUsers = Array.from(onLineUsers.keys());
+    socket.emit("get_online_users", currentOnlineUsers);
+  });
+
     registerMessageEvent(io, socket);
     registerReadEvent(io, socket);
-    registerDisconnectEvent(socket);
+
+    registerDisconnectEvent(io, socket, onLineUsers); 
   });
 
   return io;

@@ -1,13 +1,21 @@
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { handleDisconnect } from "../Messages.controller";
 
 export const registerDisconnectEvent = (
-  socket: Socket
+  io: Server, // Nhận io để emit (nếu cần gửi toàn cục)
+  socket: Socket,
+  onLineUsers: Map<string, string> // Nhận biến Map
 ) => {
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     const userId = socket.data.userId;
-    handleDisconnect(userId, new Date());
-    socket.leave(userId);
-    console.log(`User disconnected: ${userId}`);
+    const last_seen = new Date();
+
+    await handleDisconnect(userId, last_seen);
+    onLineUsers.delete(userId);
+    socket.broadcast.emit("user_offline", {
+      userId: userId,
+      last_seen: last_seen
+    });
+    console.log(`User disconnected: ${userId} at ${last_seen}`);
   });
 };

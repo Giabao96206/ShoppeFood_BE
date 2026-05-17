@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import { Document, Types } from "mongoose";
 import { Conversation } from '../model/Conversation.model';
 import {Message} from '../model/Message.model';
 
@@ -35,6 +35,7 @@ export const sendMessage = async ({ senderId, receiverId, content }: SendMessage
       status: 'sent'
     });
 
+
     // 4. Cập nhật last_message vào Conversation
     // Sử dụng findByIdAndUpdate để tối ưu tốc độ ghi
     await Conversation.findByIdAndUpdate(
@@ -59,8 +60,6 @@ export const sendMessage = async ({ senderId, receiverId, content }: SendMessage
     throw new Error("Không thể gửi tin nhắn lúc này");
   }
 };
-
-
 
 export const getUserInbox = async (userId: string) => {
   try {
@@ -88,14 +87,13 @@ export const getUserInbox = async (userId: string) => {
   }
 };
 
-
-
 // import { sendMessage, getUserInbox } from './chat.service';
 
 export const handleSendMessage = async (req: Request, res: Response) => {
   try {
     const { receiverId, content } = req.body;
-    const senderId = req.user._id; // Giả sử ID người gửi lấy từ middleware xác thực (JWT)
+    
+    const senderId = req.user!._id; // Giả sử ID người gửi lấy từ middleware xác thực (JWT)
 
     const message = await sendMessage({ senderId, receiverId, content });
     
@@ -109,10 +107,97 @@ export const handleSendMessage = async (req: Request, res: Response) => {
 };
 
 export const handleDisconnect = async (userID: string, last_seen: Date) => {
-try {
+  try {
     await User.findByIdAndUpdate(userID, { last_seen });
     return true;
-} catch(err){ 
-  return err;
+  } catch(err) { 
+    console.error("Lỗi cập nhật last_seen:", err);
+    return false;
+  }
 }
+
+
+interface Messages extends Document {
+  conversation_id: Types.ObjectId;
+  sender_id: Types.ObjectId;
+  content: string;
+  status: "sent" | "read";
 }
+
+export const GetAllMessage = async (req: Request, res: Response) : Promise<Response> => {
+  try {
+   const { conversationId } = req.body;
+   console.log(conversationId);
+   
+  if (!conversationId || Array.isArray(conversationId)) {
+   return res.status(400).json({
+    message: "conversationId không hợp lệ",
+  });
+}
+  const messages = await Message.find({
+  conversation_id: new Types.ObjectId(conversationId),
+ })
+  .sort({ createdAt: -1 }) // mới nhất trước
+  .limit(20); // lấy 20 tin nhắn gần nhất
+    return res.status(200).json({
+      message: "Success",
+      status: "200",
+      data: messages,
+    })
+  } catch (err) {
+    return res.status(500).json({
+      message: "Lỗi server",
+    });
+  
+  }
+}
+
+
+
+export const GetMoreMessages = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { conversationId } = req.params;
+
+
+    const { cursor, limit = 20 } = req.query;
+    console.log(cursor);
+
+    if (!conversationId || Array.isArray(conversationId)) {
+      return res.status(400).json({
+        message: "conversationId không hợp lệ",
+      });
+    }
+
+    const query: any = {
+      conversation_id: new Types.ObjectId(conversationId),
+    };
+
+    if (cursor && typeof cursor === "string") {
+      const date = new Date(cursor);
+      console.log(date);
+      if (!isNaN(date.getTime())) {
+        query.createdAt = {
+          $lt: date,
+        };
+      }
+    }
+
+    const messages = await Message.find(query)
+      .sort({ createdAt: -1 })
+      .limit(4);
+
+  return res.status(200).json({
+      message: "Success",
+      status: "200",
+      data: messages,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Lỗi server",
+    });
+  }
+};

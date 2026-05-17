@@ -24,7 +24,11 @@ async function askAI(question: any) {
 export const GetAI = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { questions } = req.body;
+        console.log(questions);
+        
         const response = await askAI(questions);
+        console.log(response);
+        
         return res.status(200).json({ status: "200", message: "Success", data: response})
     } catch(err) {
         return res.status(500).json({ status: "500", message: "Server error" }); 

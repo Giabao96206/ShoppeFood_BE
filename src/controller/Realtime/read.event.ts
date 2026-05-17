@@ -1,6 +1,6 @@
-    import { Socket, Server } from "socket.io";
-import { Conversation } from '../../model/Conversation.model';
-import {Message} from '../../model/Message.model';
+import { Socket, Server } from "socket.io";
+import { Conversation } from "../../model/Conversation.model";
+import { Message } from "../../model/Message.model";
 
 export const registerReadEvent = (
   io: Server,
@@ -10,23 +10,25 @@ export const registerReadEvent = (
     "mark_as_read",
     async (payload: {
       conversationId: string;
-      messageId: string;
+      messageIds: string[];
       senderId: string;
     }) => {
       try {
-        await Message.findByIdAndUpdate(
-          payload.messageId,
+
+        await Message.updateMany(
           {
-            status: "read",
+            _id: { $in: payload.messageIds },
+            status: { $ne: "read" },
+          },
+          {
+            $set: {
+              status: "read",
+            },
           }
         );
 
-        await Conversation.findOneAndUpdate(
-          {
-            _id: payload.conversationId,
-            "last_message.message_id":
-              payload.messageId,
-          },
+        await Conversation.findByIdAndUpdate(
+          payload.conversationId,
           {
             $set: {
               "last_message.is_read": true,
@@ -37,11 +39,11 @@ export const registerReadEvent = (
         io.to(payload.senderId).emit(
           "message_seen",
           {
-            conversationId:
-              payload.conversationId,
-            messageId: payload.messageId,
+            conversationId: payload.conversationId,
+            messageIds: payload.messageIds,
           }
         );
+
       } catch (error) {
         console.log(error);
       }

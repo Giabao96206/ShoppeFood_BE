@@ -13,6 +13,7 @@ import getOrder from "./getOrder.router";
 import AuthEdit from "./edit.routers";
 import Cancel from "./order.cacel.routers"
 import getAI from  "./AI.api.roters"
+import {router as getAllMessage, routerGetMM as getMoreMessage} from "./Messages.router"
 const route = (app: Express) => {
   app.use("/register", signUpRouter);
   app.use("/activateAccount", activateAccount);
@@ -28,6 +29,9 @@ const route = (app: Express) => {
   app.use("/editUser", AuthEdit);
   app.use("/cancelOrder", Cancel);
   app.use("/getAI", getAI);
+  app.use("/getAllMessage", getAllMessage);
+  app.use("/getMoreMessage", getMoreMessage);
+
 };
 
 export default route;

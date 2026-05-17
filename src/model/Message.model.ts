@@ -17,7 +17,7 @@ const MessageSchema = new Schema({
   },
   status: { 
     type: String, 
-    enum: ['sent', 'delivered', 'read'], // Chỉ cho phép 3 trạng thái này
+    enum: ['sent', 'read'], // Chỉ cho phép 3 trạng thái này
     default: 'sent' 
   }
 }, { 

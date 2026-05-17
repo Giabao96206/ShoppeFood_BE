@@ -14,7 +14,7 @@ export const validateOrder = (
 
   try {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
-    console.log(decoded);
+    
     req.user = decoded;
     return next();
   } catch (err) {
