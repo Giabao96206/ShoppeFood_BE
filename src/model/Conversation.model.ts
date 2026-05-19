@@ -15,6 +15,11 @@ const ConversationSchema = new Schema({
     content: { type: String },
     is_read: { type: Boolean, default: false },
     createdAt: { type: Date }
+  },
+  backgroundImage: {
+    type: String,
+    default: null,
+    require: false,
   }
 }, { 
   timestamps: true 

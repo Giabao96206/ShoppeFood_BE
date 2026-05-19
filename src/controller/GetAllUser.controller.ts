@@ -26,6 +26,7 @@ export const getConversation = async (
         _id: conv._id,
         otherUser,
         lastMessage: conv.last_message,
+        backgroundImage: conv.backgroundImage,
       };
     });
 

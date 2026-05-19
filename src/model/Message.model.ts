@@ -17,8 +17,13 @@ const MessageSchema = new Schema({
   },
   status: { 
     type: String, 
-    enum: ['sent', 'read'], // Chỉ cho phép 3 trạng thái này
+    enum: ['sent', 'read'], 
     default: 'sent' 
+  }, 
+  reply_to: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Message',
+    required: false 
   }
 }, { 
   timestamps: true 

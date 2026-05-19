@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 import { Conversation } from '../model/Conversation.model';
 import {Message} from '../model/Message.model';
 
@@ -9,17 +9,17 @@ interface SendMessageDTO {
   senderId: string;
   receiverId: string;
   content: string;
+  replyToMessageId?: string| null;
 }
 
-export const sendMessage = async ({ senderId, receiverId, content }: SendMessageDTO) => {
+export const sendMessage = async ({ senderId, receiverId, content, replyToMessageId }: SendMessageDTO) => {
   try {
-    // 1. Kiểm tra xem cuộc trò chuyện giữa 2 user này đã tồn tại chưa
-    // Dùng toán tử $all để tìm document có chứa cả 2 ID trong mảng participants
+  
     let conversation = await Conversation.findOne({
       participants: { $all: [senderId, receiverId] }
     });
 
-    // 2. Nếu chưa từng chat với nhau -> Tạo cuộc trò chuyện mới
+
     if (!conversation) {
       conversation = await Conversation.create({
         participants: [senderId, receiverId],
@@ -32,7 +32,10 @@ export const sendMessage = async ({ senderId, receiverId, content }: SendMessage
       conversation_id: conversation._id,
       sender_id: senderId,
       content: content,
-      status: 'sent'
+      status: 'sent',
+      reply_to: replyToMessageId
+    ? new mongoose.Types.ObjectId(replyToMessageId)
+    : null,
     });
 
 
@@ -153,7 +156,6 @@ export const GetAllMessage = async (req: Request, res: Response) : Promise<Respo
 }
 
 
-
 export const GetMoreMessages = async (
   req: Request,
   res: Response
@@ -198,6 +200,61 @@ export const GetMoreMessages = async (
     console.log(err);
     return res.status(500).json({
       message: "Lỗi server",
+    });
+  }
+};
+
+
+export const PushToken = async (req: Request, res: Response) : Promise<Response> => {
+  const { userId, token } = req.body;
+  try {
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { expoPushTokens: token } 
+    });
+   return  res.status(200).json({ message: "Đã lưu token thành công!" });
+  } catch (error) {
+   return  res.status(500).json({ error: "Lỗi server" });
+  }
+}
+
+
+
+interface IEdit {
+  backgroundImage?: string;
+}
+
+export const EditMess = async (req: Request, res: Response) => {
+  try {
+    const file = req.file as Express.Multer.File;
+    const { _id } = req.body;
+    if (!_id) {
+  return res.status(400).json({ message: "_id is required" });
+}
+    console.log(_id);
+
+    const updateData: IEdit = {};
+
+    if (file) {
+      updateData.backgroundImage = file.path;
+    }
+     const data =   await Conversation.findByIdAndUpdate(
+      _id,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if(data) {
+      console.log(data);
+    }
+
+    return res.json({
+      status:  "200",
+      message: "Conversation updated successfully",
+      data: data!.backgroundImage
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
     });
   }
 };

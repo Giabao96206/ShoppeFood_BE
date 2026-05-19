@@ -9,6 +9,7 @@ interface IUser {
   avatar?: string;
   role?: string;
   last_seen?: Date;
+  expoPushTokens?: string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -26,6 +27,7 @@ const userSchema = new Schema<IUser>(
     },
     last_seen: { type: Date, default: "" },
     isActive: { type: Boolean, default: false },
+    expoPushTokens: [{ type: String }], // Mảng lưu các token thiết bị
   },
   { timestamps: true },
 );
