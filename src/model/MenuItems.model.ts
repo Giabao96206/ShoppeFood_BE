@@ -13,6 +13,7 @@ interface IMenuItems {
   basePrice: number;
   image: string;
   options: IOptions[];
+  food_embedding?: number[];
 }
 
 const optionSchema = new Schema<IOptions>(
@@ -48,7 +49,8 @@ const menuItemsSchema = new Schema<IMenuItems>(
     },
     description: {
       type: String,
-      required: true,
+      required: false, // Thay đổi: Không bắt buộc dữ liệu cũ phải có mô tả
+      default: "",     // Tự động điền chuỗi rỗng nếu trống
       trim: true,
     },
     basePrice: {
@@ -63,6 +65,10 @@ const menuItemsSchema = new Schema<IMenuItems>(
     options: {
       type: [optionSchema],
       default: [],
+    },
+    food_embedding: {
+      type: [Number],
+      required: false,
     },
   },
   {

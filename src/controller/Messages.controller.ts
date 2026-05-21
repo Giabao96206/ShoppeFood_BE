@@ -243,9 +243,7 @@ export const EditMess = async (req: Request, res: Response) => {
       { new: true }
     );
 
-    if(data) {
-      console.log(data);
-    }
+
 
     return res.json({
       status:  "200",

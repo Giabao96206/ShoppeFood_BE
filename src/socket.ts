@@ -5,6 +5,7 @@ import { authSocketMiddleware } from "./middleware/userMessages.middleware";
 import { registerMessageEvent } from "./controller/Realtime/message.event";
 import { registerReadEvent } from "./controller/Realtime/read.event";
 import { registerDisconnectEvent } from "./controller/Realtime/disconnect.event";
+import { registerEdit } from "./controller/Realtime/editChat.event";
 
 export const onLineUsers = new Map();
 
@@ -33,7 +34,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
 
     registerMessageEvent(io, socket);
     registerReadEvent(io, socket);
-
+    registerEdit(io, socket);
     registerDisconnectEvent(io, socket, onLineUsers); 
   });
 
