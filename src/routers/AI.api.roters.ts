@@ -1,9 +1,11 @@
 import express from "express";
 import { GetAI } from "../controller/AI/ask.api.controller";
+import { searchFoodByAI } from "../controller/AI/aiSearchController";
 
 
-const router = express.Router();
-
+export const router = express.Router();
 router.post("/", GetAI);
 
-export default router;
+export const routerFoodAI = express.Router();
+routerFoodAI.post("/", searchFoodByAI);
+

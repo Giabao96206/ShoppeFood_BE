@@ -12,7 +12,7 @@ import createOder from "./order.routers";
 import getOrder from "./getOrder.router";
 import AuthEdit from "./edit.routers";
 import Cancel from "./order.cacel.routers"
-import getAI from  "./AI.api.roters"
+import {router as getAI, routerFoodAI as getAIFood} from  "./AI.api.roters"
 import {router as getAllMessage, routerGetMM as getMoreMessage, routerPushtoken as RouterPT, routerEditMM as EditMM } from "./Messages.router"
 const route = (app: Express) => {
   app.use("/register", signUpRouter);
@@ -29,6 +29,7 @@ const route = (app: Express) => {
   app.use("/editUser", AuthEdit);
   app.use("/cancelOrder", Cancel);
   app.use("/getAI", getAI);
+  app.use("/getFoodAI", getAIFood)
   app.use("/getAllMessage", getAllMessage);
   app.use("/getMoreMessage", getMoreMessage);
   app.use("/api/users/push-token", RouterPT);
