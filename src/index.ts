@@ -4,17 +4,14 @@ import dotenv from "dotenv";
 import connectDB from "./config/database";
 import routes from "./routers/index.routers";
 import path from "path";
-
+const Redis = require('ioredis');
 import http from "http";
-
 import { initializeSocket } from "./socket";
 
 dotenv.config();
-
 const app = express();
 
 const server = http.createServer(app);
-
 // init socket
 initializeSocket(server);
 
