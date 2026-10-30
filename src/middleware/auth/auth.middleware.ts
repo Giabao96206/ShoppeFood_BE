@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 
-export const validateOrder = (
+export const authMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,

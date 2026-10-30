@@ -1,4 +1,5 @@
 import { Express } from "express";
+import express from "express";
 import signUpRouter from "./signup.routers";
 import activateAccount from "./activate.routers";
 import LoginUser from "./login.routers";
@@ -14,26 +15,35 @@ import AuthEdit from "./edit.routers";
 import Cancel from "./order.cacel.routers"
 import getAI from  "./AI.api.roters"
 import {router as getAllMessage, routerGetMM as getMoreMessage, routerPushtoken as RouterPT, routerEditMM as EditMM } from "./Messages.router"
+import { authMiddleware } from "../middleware/auth/auth.middleware";
+
 const route = (app: Express) => {
+  // Public routes
   app.use("/register", signUpRouter);
   app.use("/activateAccount", activateAccount);
-  app.use("/getAllUser", getConversation);
   app.use("/login", LoginUser);
   app.use("/ReSendCode", ReSend);
-  app.use("/account", Check);
-  app.use("/api/upload", uploadrouter);
   app.use("/topRating", TopRate);
   app.use("/menu", Menu);
-  app.use("/api/order", createOder);
-  app.use("/api/getOrder", getOrder);
-  app.use("/editUser", AuthEdit);
-  app.use("/cancelOrder", Cancel);
-  app.use("/getAI", getAI);
-  app.use("/getAllMessage", getAllMessage);
-  app.use("/getMoreMessage", getMoreMessage);
-  app.use("/api/users/push-token", RouterPT);
-  app.use("/editMM", EditMM);
 
+  // Protected routes
+  const protectedRouter = express.Router();
+  protectedRouter.use(authMiddleware);
+
+  protectedRouter.use("/getAllUser", getConversation);
+  protectedRouter.use("/account", Check);
+  protectedRouter.use("/api/upload", uploadrouter);
+  protectedRouter.use("/api/order", createOder);
+  protectedRouter.use("/api/getOrder", getOrder);
+  protectedRouter.use("/editUser", AuthEdit);
+  protectedRouter.use("/cancelOrder", Cancel);
+  protectedRouter.use("/getAI", getAI);
+  protectedRouter.use("/getAllMessage", getAllMessage);
+  protectedRouter.use("/getMoreMessage", getMoreMessage);
+  protectedRouter.use("/api/users/push-token", RouterPT);
+  protectedRouter.use("/editMM", EditMM);
+
+  app.use("/", protectedRouter);
 };
 
 export default route;

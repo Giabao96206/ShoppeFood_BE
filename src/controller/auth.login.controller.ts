@@ -3,8 +3,6 @@ import User from "../model/User.model";
 import bcrypt from "bcryptjs";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { Document } from "mongoose";
-import { access } from "node:fs";
-
 
 interface IUser extends Document {
   name?: string;
@@ -78,30 +76,17 @@ export const CheckAccount = async (
   req: Request,
   res: Response,
 ): Promise<Response> => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ message: "Chưa có token" });
-  }
-
-
-  if (!authHeader) {
-    return res.status(401).json({ message: "Chưa đăng nhập" });
-  }
-
-  const token: string = authHeader.split(" ")[1] || "";
-  if (token == null) {
-    return res.status(401).json({ message: "Chưa có token" });
-  }
-  
   try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+    const userId = req.user?.userID;
 
-    const user = await User.findById(decoded.userID);
+    if (!userId) {
+       return res.status(401).json({ message: "User not found in token" });
+    }
+
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log( decoded);
 
     return res.status(200).json({
       status: "200",
@@ -111,11 +96,6 @@ export const CheckAccount = async (
       },
     });
   } catch (err) {
-    if (err instanceof TokenExpiredError) {
-      return res
-        .status(401)
-        .json({ message: "Token hết hạn, vui lòng đăng nhập lại" });
-    }
     return res.status(500).json({ status: "500", message: "Server error" });
   }
 };
