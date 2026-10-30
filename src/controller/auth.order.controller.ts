@@ -24,7 +24,7 @@ export const createOrder = async (
   try {
     const { restaurant, totalPrice, quantity, details }: CreateOrderDTO =
       req.body;
-    const userId = req.user.userID;
+    const userId = req.user?.userID;
 
     await Orders.create({
       restaurant,
@@ -50,7 +50,7 @@ export const getLastOrder = async (
   res: Response,
 ): Promise<Response> => {
   try {
-    const userId = req.user.userID;
+    const userId = req.user?.userID;
 
     const MaplastOrder = await Orders.find({ user: userId, deleted: false}).sort({
       createdAt: -1,
@@ -89,7 +89,7 @@ export const CancelOrder = async (
 ): Promise<Response> => {
   try {
     const { OrderID } = req.body; 
-    const userId = req.user.userID;
+    const userId = req.user?.userID;
 
     const order = await Orders.findById(OrderID);
     if(!order) {
